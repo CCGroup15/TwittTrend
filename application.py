@@ -4,6 +4,11 @@ import json
 
 application = Flask(__name__)
 
+@application.route('/send', methods=['POST'])
+def insert_es():
+    tweet = json.loads(request.form['tweet'])
+    config.es.index(index = config.AWS_ES_INDEX, doc_type = config.AWS_ES_TYPE, id = tweet['id'], body = tweet)
+
 @application.route('/')
 def say_hello():
     category = config.FILTERS

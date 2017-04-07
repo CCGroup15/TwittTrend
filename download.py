@@ -9,7 +9,9 @@ import boto3
 
 #from http.client import IncompleteRead
 
-sqs = boto3.resource('sqs');
+sqs = boto3.resource('sqs',
+                     aws_access_key_id = config.AWS_ACCESS_KEY,
+                     aws_secret_access_key = config.AWS_SECRET_KEY);
 
 
 def get_category(tweet):
@@ -39,6 +41,7 @@ class MyListener(StreamListener):
                         lng = geocode_result[0]['geometry']['location']['lng']
                         tweet_text = tweet['text'].lower().encode('ascii', 'ignore').decode('ascii')
                         raw_tweet = {
+                            'id': tweet_id,
                             'user': tweet['user']['screen_name'],
                             'text': tweet_text,
                             'place': place,
@@ -46,8 +49,8 @@ class MyListener(StreamListener):
                             'time': tweet['created_at'],
                             'category': get_category(tweet_text)
                         }
-                        #with open('result.json', 'a') as f:
-                        #    f.write(json.dumps(raw_tweet))
+                       # with open('result.json', 'a') as f:
+                       #     f.write(json.dumps(raw_tweet))
                        
                         # send message to SQS
                         queue = sqs.get_queue_by_name(QueueName='MyQueue')

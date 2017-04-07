@@ -13,7 +13,7 @@ AWS_SECRET_KEY="ouk1zid5m3Mtj8s7Rjn9RK1Hea4gCZ5fwDbncLNv"
 AWS_REGION="us-east-1"
 
 AWS_ES_PORT  = 443
-AWS_ES_HOST = "search-twitter-map-sh6gbw33qb4r36en7ckqhvbdt4.us-east-1.es.amazonaws.com"
+AWS_ES_HOST = "search-twitt-trend-acm2sqv5wfi4omwdstn6i2cgc4.us-east-1.es.amazonaws.com"
 AWS_ES_INDEX = 'twitter-map'
 AWS_ES_TYPE = 'tweet'
 
@@ -30,7 +30,8 @@ es = Elasticsearch(
     connection_class=RequestsHttpConnection
 )
 
-GMAP_KEY = 'AIzaSyAovkBO68rNju_an3XHa29XmUQ0RWq55Is'
+# GMAP_KEY = 'AIzaSyAovkBO68rNju_an3XHa29XmUQ0RWq55Is'
+GMAP_KEY = 'AIzaSyBUWXTkXDOmT_3QEU4ovQDmkgeZFr_3xzw'
 gmaps = googlemaps.Client(key=GMAP_KEY)
 
 
