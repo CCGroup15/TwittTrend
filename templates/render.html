@@ -7,7 +7,7 @@
     <meta name="author" content="CC_Group15">
     <link rel="icon" href="../favicon.ico">
 
-    <title>Twitt Map</title>
+    <title>Twitt Trend</title>
 
     <link rel="stylesheet" href="../static/docsupport/style.css">
     <link rel="stylesheet" href="../static/docsupport/prism.css">
@@ -15,16 +15,16 @@
     <link rel="stylesheet" href="../static/css/bootstrap.min.css" >
     <link href="../static/css/jumbotron.css" rel="stylesheet">
     <style type="text/css" media="all">
-    .chosen-rtl .chosen-drop { left: -9000px; }
-    #map {
-      height: 100%;
-    }
-    html, body {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
-  </style>
+      .chosen-rtl .chosen-drop { left: -9000px; }
+      #map {
+        height: 100%;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
 
   </head>
 
@@ -36,9 +36,10 @@
       <div class="collapse navbar-collapse" id="navbarsExampleDefault">
         <ul class="navbar-nav mr-auto">
         </ul>
-        <form class="form-inline my-2 my-lg-0" action="/icon_result" method="GET">
+        <!-- <form class="form-inline my-2 my-lg-0" action = "/icon_result" method="GET"> -->
+        <!-- <form class="form-inline my-2 my-lg-0"  method="GET"> -->
         <li class = "nav-item mr-sm-2 my-lg-0">
-          <select data-placeholder=" Keyword Select" style="width:300px;" class="chosen-select" multiple tabindex="6" name="category" id="category">
+          <select data-placeholder=" Keyword Select" style="width:300px;" class="chosen-select" multiple tabindex="6" name="category" id="category" >
             <option value=""></option>
             <optgroup label="Area">
                 <option>USA</option>
@@ -80,7 +81,7 @@
             }
           </script>
         </li>
-        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Submit</button>
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit" id ="btnSubmit">Submit</button>
         </form>
     </nav>
 
@@ -96,24 +97,94 @@
     <script src="../static/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="../assets/js/ie10-viewport-bug-workaround.js"></script>
-
+    <script   src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
     <script>
+          use = {{ coords }};
           var map;
-          use = {{coords}}
+          //var key_select = false;
+          var timeInt;
+          var req;
+          var markers = [];
+
+          $(document).ready(function() {
+              $("#btnSubmit").click(function(){
+                keyword = $('#category option:selected').val();
+                //alert(keyword);
+                //key_select = true;
+                render_map(false);
+              });
+          });
+
           function initMap() {
-            map = new google.maps.Map(document.getElementById('map'), {
+              map = new google.maps.Map(document.getElementById('map'), {
               zoom: 2,
-              center: {lat: -33.865427, lng: 151.196123},
+              center: {lat: 33.865427, lng: 151.196123},
               mapTypeId: 'terrain'
             });
-
-            for (i = 0; i < use.length; i++) {
-              marker = new google.maps.Marker({
-                position: new google.maps.LatLng(use[i][0], use[i][1]),
-                map: map
-              });
+            render_map(true);
+            // if(!key_select){
+            //   alert("run!!!")
+            //   for (i = 0; i < use.length; i++) {
+            //     marker = new google.maps.Marker({
+            //       position: new google.maps.LatLng(use[i][0], use[i][1]),
+            //       map: map
+            //     });
+            //     markers.push(marker);
+            //   }
+            // }
+          }
+          function clear_map(){
+            for (var i = 0; i < markers.length; i++) {
+              markers[i].setMap(null);
             }
           }
+          function render_map(render_all){
+            if (render_all)
+              var keyword = 'all';
+            else
+              var keyword = $('#category option:selected').val();
+            if (req) {
+              req.abort();
+            }
+
+            clearInterval(timeInt);
+            timeInt = setInterval (function(){ 
+              req =  $.ajax({
+              url : "icon_result/" + keyword,
+              success: function (resp) {
+                  clear_map();
+                  for(var i =0; i < resp.length; i++){
+                      if (resp[i]['coordinates'][2]==1){
+                          var image = "http://maps.google.com/mapfiles/ms/icons/green-dot.png"
+                      }
+                      else if (resp[i]['coordinates'][2]==-1) {
+                          var image = "http://maps.google.com/mapfiles/ms/icons/red-dot.png"
+                      } else{
+                          var image = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png"
+                      }
+                      marker = new google.maps.Marker({
+                        position: new google.maps.LatLng(resp[i]['coordinates'][0], 
+                                                         resp[i]['coordinates'][1]),
+                        map: map,
+                        icon: image
+                    });
+                    markers.push(marker);
+                  }
+                // resploc = parseResponse (resp);
+                // hashOfSentiment = parseResponseForSentiment(resp);
+                // var difference = differenceBetweenTwoArrays (locations, resploc);
+                // locations =  locations.concat(difference);
+                // plotNewLocationsOnMap(locations, hashOfSentiment);
+              }
+            });
+            
+            }, 1000);
+          }
+          function diff_of_markers(){
+
+          }
+
+
     </script>
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAovkBO68rNju_an3XHa29XmUQ0RWq55Is&callback=initMap">
